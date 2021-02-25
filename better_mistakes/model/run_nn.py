@@ -53,10 +53,11 @@ def run_nn(loader, model, loss_function, distances, classes, opts, epoch, prev_s
 
     with conditional(is_inference, torch.no_grad()):
         time_load0 = time.time()
+        print('start op')
         for batch_idx, (embeddings, target) in enumerate(loader):
+
             this_load_time = time.time() - time_load0
             this_rest0 = time.time()
-
             assert embeddings.size(0) == opts.batch_size, "Batch size should be constant (data loader should have drop_last=True)"
             if opts.gpu is not None:
                 embeddings = embeddings.cuda(opts.gpu, non_blocking=True)
@@ -102,6 +103,7 @@ def run_nn(loader, model, loss_function, distances, classes, opts, epoch, prev_s
                 topK_hdist_mistakes = topK_hdist[mistakes_ids, :]
                 # obtain similarities from distances
                 topK_hsimilarity = 1 - topK_hdist / max_dist
+
                 # all the average precisions @k \in [1:max_k]
                 topK_AP = [np.sum(topK_hsimilarity[:, :k]) / np.sum(best_hier_similarities[:, :k]) for k in range(1, max(topK_to_consider) + 1)]
                 for i in range(len(topK_to_consider)):

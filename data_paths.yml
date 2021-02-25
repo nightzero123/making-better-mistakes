@@ -1,0 +1,3 @@
+tiered-imagenet-224: '/your/path/to/tieredImagenet-H'
+inaturalist19-224: '/data/likai/competitions/inaturalist-2019-fgvc6'
+

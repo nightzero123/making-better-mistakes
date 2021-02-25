@@ -24,7 +24,6 @@ class DistanceDict(dict):
     def __setitem__(self, i):
         raise NotImplementedError()
 
-
 def get_label(node):
     if isinstance(node, Tree):
         return node.label()
@@ -86,11 +85,9 @@ def load_distances(dataset, dist_type, data_dir):
 def get_uniform_weighting(hierarchy: Tree, value):
     """
     Construct unit weighting tree from hierarchy.
-
     Args:
         hierarchy: The hierarchy to use to generate the weights.
         value: The value to fill the tree with.
-
     Returns:
         Weights as a nltk.Tree whose labels are the weights associated with the
         parent edge.
@@ -144,7 +141,6 @@ def get_exponential_weighting(hierarchy: Tree, value, normalize=True):
 def get_weighting(hierarchy: Tree, weighting="uniform", **kwargs):
     """
     Get different weightings of edges in a tree.
-
     Args:
         hierarchy: The tree to generate the weighting for.
         weighting: The type of weighting, one of 'uniform', 'exponential'.

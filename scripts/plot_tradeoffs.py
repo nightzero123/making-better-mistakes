@@ -24,8 +24,8 @@ SFT_COLOR = (31 / 255, 119 / 255, 180 / 255, ALPHA)
 HXE_COLOR = (255 / 255, 127 / 255, 14 / 255, ALPHA)
 NRM_COLOR = (0 / 255, 0 / 255, 0 / 255, ALPHA)
 
-BASE_PATH = "../experiments"
-OUTPUT_DIR = "./"
+BASE_PATH = '/data/likai/competitions/inaturalist-2019-fgvc6/'
+OUTPUT_DIR = "/data/likai/competitions/inaturalist-2019-fgvc6/tradeoff"
 
 NSAMPLES = 5
 
@@ -34,12 +34,12 @@ experiment_to_best_epoch = dict()
 # ------------------------------------------------------------------------- Tiered
 
 HXENT_TIERED = [
-    ("experiments/hxe_tieredimagenet_alpha0.1", "0.1"),
-    ("experiments/hxe_tieredimagenet_alpha0.2", "0.2"),
-    ("experiments/hxe_tieredimagenet_alpha0.3", "0.3"),
-    ("experiments/hxe_tieredimagenet_alpha0.4", "0.4"),
-    ("experiments/hxe_tieredimagenet_alpha0.5", "0.5"),
-    ("experiments/hxe_tieredimagenet_alpha0.6", "0.6"),
+    #("experiments/hxe_tieredimagenet_alpha0.1", "0.1"),
+    #("experiments/hxe_tieredimagenet_alpha0.2", "0.2"),
+    ("checkpoint/hxe_tieredimagenet_alpha0.3", "0.3"),
+    #("experiments/hxe_tieredimagenet_alpha0.4", "0.4"),
+    #("experiments/hxe_tieredimagenet_alpha0.5", "0.5"),
+    #("experiments/hxe_tieredimagenet_alpha0.6", "0.6"),
 ]
 
 SOFT_TIERED = [
@@ -66,23 +66,23 @@ BD_TIERED = [("experiments/barzdenzler_tieredimagenet", "")]
 # ------------------------------------------------------------------------- iNaturalist19
 
 HXENT_INAT19 = [
-    ("experiments/hxe_inaturalist19_alpha0.1", "0.1"),
-    ("experiments/hxe_inaturalist19_alpha0.2", "0.2"),
-    ("experiments/hxe_inaturalist19_alpha0.3", "0.3"),
-    ("experiments/hxe_inaturalist19_alpha0.4", "0.4"),
-    ("experiments/hxe_inaturalist19_alpha0.5", "0.5"),
-    ("experiments/hxe_inaturalist19_alpha0.6", "0.6"),
-    ("experiments/hxe_inaturalist19_alpha0.7", "0.7"),
-    ("experiments/hxe_inaturalist19_alpha0.9", "0.9"),
+    #("checkpoint/hxe_inaturalist19_alpha0.1", "0.1"),
+    #("checkpoint/hxe_inaturalist19_alpha0.2", "0.2"),
+    ("checkpoint/hxe_inaturalist19_alpha0.3", "0.3"),
+    #("checkpoint/hxe_inaturalist19_alpha0.4", "0.4"),
+    #("checkpoint/hxe_inaturalist19_alpha0.5", "0.5"),
+    #("checkpoint/hxe_inaturalist19_alpha0.6", "0.6"),
+    #("checkpoint/hxe_inaturalist19_alpha0.7", "0.7"),
+    #("checkpoint/hxe_inaturalist19_alpha0.9", "0.9"),
 ]
 
 SOFT_INAT19 = [
-    ("experiments/softlabels_inaturalist19_beta04", "4"),
-    ("experiments/softlabels_inaturalist19_beta05", "5"),
-    ("experiments/softlabels_inaturalist19_beta10", "10"),
-    ("experiments/softlabels_inaturalist19_beta15", "15"),
-    ("experiments/softlabels_inaturalist19_beta20", "20"),
-    ("experiments/softlabels_inaturalist19_beta30", "30"),
+    ("checkpoint/softlabels_inaturalist19_beta04", "4"),
+    ("checkpoint/softlabels_inaturalist19_beta05", "5"),
+    ("checkpoint/softlabels_inaturalist19_beta10", "10"),
+    ("checkpoint/softlabels_inaturalist19_beta15", "15"),
+    ("checkpoint/softlabels_inaturalist19_beta20", "20"),
+    ("checkpoint/softlabels_inaturalist19_beta30", "30"),
 ]
 
 XENT_INAT19 = [
@@ -252,7 +252,7 @@ def load_and_plot_experiments(
 
     # In these cases the polynomial fails to capture the loss behaviour over the full range of epochs, so we harcode the range were the optimum is.
     for path, label in experiments:
-        if path == "experiments/softlabels_inaturalist19_beta15":
+        if path == "softlabels_inaturalist19_beta15":
             min_epoch = 0
 
         results, epochs, start, end = get_results(path, nsamples, min_epoch, max_epoch, plot_fit=plot_fit)
@@ -309,7 +309,7 @@ def make_figures(process_results, axes, legend_location, plot_fit=False):
     fig = plt.figure(figsize=FIG_SIZE)
 
     plt.legend(handles=legend_elements, loc=legend_location, facecolor="white", framealpha=1, edgecolor="k", fancybox=False)
-
+    '''
     load_and_plot_experiments(
         HXENT_TIERED,
         process_results,
@@ -382,12 +382,12 @@ def make_figures(process_results, axes, legend_location, plot_fit=False):
         max_epoch=115,
         plot_fit=plot_fit,
     )
-
+    
     plt.xlabel(axes["xlabel"])
     plt.ylabel(axes["ylabel"])
     save_figure("tiered-imagenet-h", axes["y"], axes["x"])
     plt.close(fig)
-
+    '''
     # ############################ #
     # main / iNat19                #
     # ############################ #
@@ -410,6 +410,7 @@ def make_figures(process_results, axes, legend_location, plot_fit=False):
         max_epoch=270,
         plot_fit=plot_fit,
     )
+    '''
     load_and_plot_experiments(
         SOFT_INAT19,
         process_results,
@@ -457,7 +458,7 @@ def make_figures(process_results, axes, legend_location, plot_fit=False):
         max_epoch=270,
         plot_fit=plot_fit,
     )
-
+    '''
     plt.xlabel(axes["xlabel"])
     plt.ylabel(axes["ylabel"])
     save_figure("inaturalist19", axes["y"], axes["x"])
@@ -467,10 +468,10 @@ def make_figures(process_results, axes, legend_location, plot_fit=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Plot results.")
     parser.add_argument("--exp-path", default=BASE_PATH, help="Folder with the experiment data")
-    parser.add_argument("--output-dir", default="../paper_main_plots", help="Folder to dump the plots.")
+    parser.add_argument("--output-dir", default="/data/likai/competitions/inaturalist-2019-fgvc6/tradeoff", help="Folder to dump the plots.")
     parser.add_argument("--plot-fit", action="store_true", help="Also plot fit curves.")
     parser.add_argument("--big", action="store_true", help="Produce bigger plots.")
-    parser.add_argument("--latex", action="store_false", help="Use latex for text.")
+    parser.add_argument("--latex", default = False, action="store_false", help="Use latex for text.")
     opts = parser.parse_args()
 
     if not opts.big:

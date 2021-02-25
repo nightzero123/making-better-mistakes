@@ -28,16 +28,12 @@ class HierarchicalLLLoss(torch.nn.Module):
 
     def __init__(self, hierarchy: Tree, classes: List[str], weights: Tree):
         super(HierarchicalLLLoss, self).__init__()
-
         assert hierarchy.treepositions() == weights.treepositions()
-
-        # the tree positions of all the leaves
+        # the tree positions of all the leaves,
         positions_leaves = {get_label(hierarchy[p]): p for p in hierarchy.treepositions("leaves")}
         num_classes = len(positions_leaves)
-
-        # we use classes in the given order
+        # we use classes in the given order,
         positions_leaves = [positions_leaves[c] for c in classes]
-
         # the tree positions of all the edges (we use the bottom node position)
         positions_edges = hierarchy.treepositions()[1:]  # the first one is the origin
 
@@ -62,7 +58,7 @@ class HierarchicalLLLoss(torch.nn.Module):
         # indices of all leaf nodes for each edge index
         leaf_indices = [[index_map_leaves[position + leaf] for leaf in get_leaf_positions(position)] for position in positions_edges]
 
-        # save all relevant information as pytorch tensors for computing the loss on the gpu
+        # save all relevant information as pytorch tensors for computing the loss on the gpu，
         self.onehot_den = torch.nn.Parameter(torch.zeros([num_classes, num_classes, num_edges]), requires_grad=False)
         self.onehot_num = torch.nn.Parameter(torch.zeros([num_classes, num_classes, num_edges]), requires_grad=False)
         self.weights = torch.nn.Parameter(torch.zeros([num_classes, num_edges]), requires_grad=False)
@@ -86,18 +82,22 @@ class HierarchicalLLLoss(torch.nn.Module):
         """
         # add a sweet dimension to inputs
         inputs = torch.unsqueeze(inputs, 1)
-        # sum of probabilities for numerators
+
+        # sum of probabilities for numerators 分子的概率
         num = torch.squeeze(torch.bmm(inputs, self.onehot_num[target]))
-        # sum of probabilities for denominators
+
+        # sum of probabilities for denominators 分母的概率
         den = torch.squeeze(torch.bmm(inputs, self.onehot_den[target]))
+
         # compute the neg logs for non zero numerators and store in there
         idx = num != 0
         num[idx] = -torch.log(num[idx] / den[idx])
+
         # weighted sum of all logs for each path (we flip because it is numerically more stable)
         num = torch.sum(torch.flip(self.weights[target] * num, dims=[1]), dim=1)
+
         # return sum of losses / batch size
         return torch.mean(num)
-
 
 class HierarchicalCrossEntropyLoss(HierarchicalLLLoss):
     """

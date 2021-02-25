@@ -174,11 +174,10 @@ def main(test_opts):
         with open(os.path.join(test_opts.experiments_path, experiment, "test_summary_table.json"), "w") as fp:
             json.dump(summaries_table, fp, indent=4)
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--experiments_json", default="experiment_test.json", help="json containing experiments and epochs to run")
-    parser.add_argument("--experiments_path", help="Path to experiments logs", default="../experiments")
+    parser.add_argument("--experiments_path", help="Path to experiments logs", default="/data/likai/competitions/inaturalist-2019-fgvc6/checkpoint/hxe_inaturalist19_alpha0.3/")
     parser.add_argument("--data-paths-config", help="Path to data paths yaml file", default="../data_paths.yml")
     parser.add_argument("--data-path", default=None, help="explicit location of the data folder, if None use config file.")
     parser.add_argument("--data_dir", default="../data/", help="Folder containing the supplementary data")

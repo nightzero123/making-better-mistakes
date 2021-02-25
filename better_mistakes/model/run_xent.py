@@ -1,3 +1,6 @@
+import sys
+sys.path.append('..')
+
 import time
 import numpy as np
 import os.path
@@ -6,7 +9,7 @@ from conditional import conditional
 import tensorboardX
 from better_mistakes.model.performance import accuracy
 from better_mistakes.model.labels import make_batch_onehot_labels, make_batch_soft_labels
-
+from hyptorch.nn import *
 topK_to_consider = (1, 5, 10, 20, 100)
 
 # lists of ids for loggings performance measures
@@ -72,13 +75,21 @@ def run(loader, model, loss_function, distances, all_soft_labels, classes, opts,
             target = target.cuda(opts.gpu, non_blocking=True)
 
             # get model's prediction
-            output = model(embeddings)
-
+            try:
+                output = model(embeddings)
+            except RuntimeError as exception:
+                if "out of memory" in str(exception):
+                    print("WARNING: out of memory")
+                    if hasattr(torch.cuda, 'empty_cache'):
+                        torch.cuda.empty_cache()
+                else:
+                    raise exception
             # for soft-labels we need to add a log_softmax and get the soft labels
+            # output = model(embeddings)
             if opts.loss == "soft-labels":
                 output = torch.nn.functional.log_softmax(output, dim=1)
                 if opts.soft_labels:
-                    target_distribution = make_batch_soft_labels(all_soft_labels, target, opts.num_classes, opts.batch_size, opts.gpu)
+                    target_distributionls = make_batch_soft_labels(all_soft_labels, target, opts.num_classes, opts.batch_size, opts.gpu)
                 else:
                     target_distribution = make_batch_onehot_labels(target, opts.num_classes, opts.batch_size, opts.gpu)
                 loss = loss_function(output, target_distribution)

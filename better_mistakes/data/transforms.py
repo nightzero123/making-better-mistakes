@@ -15,8 +15,7 @@ normalize_tfs_dict = {
     "inaturalist19-224": normalize_tfs_inat19,
 }
 
-
-def train_transforms(img_resolution, dataset, augment=True, normalize=True):
+def train_transforms(img_resolution, dataset, augment=True, normalize=True): # 对图片进行预处理；
     if augment and normalize:
         return transforms.Compose(
             [
@@ -25,7 +24,7 @@ def train_transforms(img_resolution, dataset, augment=True, normalize=True):
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 normalize_tfs_dict[dataset],
-            ]
+            ]   
         )
     elif not augment and normalize:
         return transforms.Compose([transforms.ToTensor(), normalize_tfs_dict[dataset]])
@@ -35,7 +34,7 @@ def train_transforms(img_resolution, dataset, augment=True, normalize=True):
         return transforms.Compose([transforms.ToTensor()])
 
 
-def val_transforms(dataset, normalize=True, resize=None, crop=None):
+def val_transforms(dataset, normalize=True, resize=(224, 224), crop=None): # 验证机需要将图片resize成相同大小的吗；
     trsfs = []
 
     if resize:

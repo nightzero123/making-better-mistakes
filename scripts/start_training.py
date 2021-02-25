@@ -1,3 +1,6 @@
+import sys
+sys.path.append('..')
+
 import argparse
 import os
 import json
@@ -15,6 +18,9 @@ import torch.utils.data
 import torch.utils.data.distributed
 import torchvision.datasets as datasets
 import torchvision.models as models
+
+import sys
+sys.path.append("/home/likai/project/make_better_mistake/making-better-mistakes")
 
 from better_mistakes.util.rand import make_deterministic
 from better_mistakes.util.folders import get_expm_folder
@@ -68,6 +74,7 @@ def main_worker(gpus_per_node, opts):
     )
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=opts.batch_size, shuffle=False, num_workers=opts.workers, pin_memory=True, drop_last=True)
 
+
     # Adjust the number of epochs to the size of the dataset
     num_batches = len(train_loader)
     opts.epochs = int(round(opts.num_training_steps / num_batches))
@@ -108,7 +115,6 @@ def main_worker(gpus_per_node, opts):
 
     # setup model
     model = init_model_on_gpu(gpus_per_node, opts)
-
     # setup optimizer
     optimizer = _select_optimizer(model, opts)
 
@@ -286,12 +292,13 @@ if __name__ == "__main__":
     parser.add_argument("--pretrained_folder", type=str, default=None, help="folder or file from which to load the network weights")
     parser.add_argument("--dropout", default=0.0, type=float, help="Prob of dropout for network FC layer")
     parser.add_argument("--data_augmentation", type=boolean, default=True, help="Train with basic data augmentation")
-    parser.add_argument("--num_training_steps", default=200000, type=int, help="number of total steps to train for (num_batches*num_epochs)")
+    parser.add_argument("--num_training_steps", default=400000, type=int, help="number of total steps to train for (num_batches*num_epochs)")
     parser.add_argument("--start-epoch", default=0, type=int, help="manual epoch number (useful on restarts)")
     parser.add_argument("--batch-size", default=256, type=int, help="total batch size")
     parser.add_argument("--shuffle_classes", default=False, type=boolean, help="Shuffle classes in the hierarchy")
     parser.add_argument("--beta", default=0, type=float, help="Softness parameter: the higher, the closer to one-hot encoding")
     parser.add_argument("--alpha", type=float, default=0, help="Decay parameter for hierarchical cross entropy.")
+
     # Devise/B&D ----------------------------------------------------------------------------------------------------------------------------------------------
     parser.add_argument("--devise", type=boolean, default=False, help="Use DeViSe label embeddings")
     parser.add_argument("--devise_single_negative", type=boolean, default=False, help="Use one negative per samples instead of all")
@@ -302,26 +309,34 @@ if __name__ == "__main__":
     parser.add_argument("--lr_fc", default=1e-3, type=float, help="learning rate for FC layers")
     parser.add_argument("--weight_decay_fc", default=0.0, type=float, help="weight decay of FC layers")
     parser.add_argument("--use_fc_batchnorm", default=False, type=boolean, help="Batchnorm layer in network head")
+    # parser.add_argument("--distributed", default = True, type = boolean, help = "distributed GPU")
+
     # Data/paths ----------------------------------------------------------------------------------------------------------------------------------------------
     parser.add_argument("--data", default="tiered-imagenet-224", help="id of the dataset to use: | ".join(DATASET_NAMES))
     parser.add_argument("--target_size", default=224, type=int, help="Size of image input to the network (target resize after data augmentation)")
-    parser.add_argument("--data-paths-config", help="Path to data paths yaml file", default="../data_paths.yml")
+    parser.add_argument("--data-paths-config", help="Path to data paths yaml file", default='/data/likai/project/making-better-mistakes/data_paths.yml')
     parser.add_argument("--data-path", default=None, help="explicit location of the data folder, if None use config file.")
-    parser.add_argument("--data_dir", default="../data/", help="Folder containing the supplementary data")
-    parser.add_argument("--output", default=None, help="path to the model folder")
-    parser.add_argument("--expm_id", default="", type=str, help="Name log folder as: out/<scriptname>/<date>_<expm_id>. If empty, expm_id=time")
+    parser.add_argument("--data_dir", default="/data/likai/project/making-better-mistakes/data/", help="Folder containing the supplementary data")
+    parser.add_argument("--output", default='/data/likai/competitions/inaturalist-2019-fgvc6/checkpoint/', help="path to the model folder")
+    parser.add_argument("--expm_id", default="/data/likai/competitions/inaturalist-2019-fgvc6/log/", type=str, help="Name log folder as: out/<scriptname>/<date>_<expm_id>. If empty, expm_id=time")
+
     # Log/val -------------------------------------------------------------------------------------------------------------------------------------------------
     parser.add_argument("--log_freq", default=100, type=int, help="Log every log_freq batches")
     parser.add_argument("--val_freq", default=5, type=int, help="Validate every val_freq epochs (except the first 10 and last 10)")
     # Execution -----------------------------------------------------------------------------------------------------------------------------------------------
     parser.add_argument("--workers", default=2, type=int, help="number of data loading workers")
     parser.add_argument("--seed", default=None, type=int, help="seed for initializing training. ")
-    parser.add_argument("--gpu", default=0, type=int, help="GPU id to use.")
+    parser.add_argument("--gpu", default=None, type=int, help="GPU id to use.")
 
     opts = parser.parse_args()
 
     # setup output folder
     opts.out_folder = opts.output if opts.output else get_expm_folder(__file__, "out", opts.expm_id)
+
+
+    # set up out_folder
+    opts.out_folder = os.path.join('/data/likai/competitions/inaturalist-2019-fgvc6/checkpoint/', opts.out_folder)
+
     if not os.path.exists(opts.out_folder):
         print("Making experiment folder and subfolders under: ", opts.out_folder)
         os.makedirs(os.path.join(opts.out_folder, "json/train"))
